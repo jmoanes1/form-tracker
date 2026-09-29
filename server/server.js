@@ -32,7 +32,7 @@ const extraOrigins = String(process.env.FRONTEND_URL || "")
   .filter(Boolean);
 const allowedOrigins = [...devOrigins, ...extraOrigins];
 
-function isAssetRequest(req) {
+function assetOrPageRequest(req) {
   const p = String(req.path || "");
   return (
     p.startsWith("/assets/") ||
@@ -42,10 +42,25 @@ function isAssetRequest(req) {
   );
 }
 
+function sameOrigin(req) {
+  const host = String(req.headers.host || "").toLowerCase();
+  if (!host) return false;
+  const origins = [req.headers.origin, req.headers.referer]
+    .filter(Boolean)
+    .map(String);
+  return origins.some((o) => {
+    try {
+      return new URL(o).host.toLowerCase() === host;
+    } catch {
+      return false;
+    }
+  });
+}
+
 app.use((req, res, next) => {
-  // Assets are always same-origin public files — skip CORS entirely so a
+  // Public static files and the SPA shell are same-origin — skip CORS so a
   // missing Origin allowlist entry can never blank the page.
-  if (isAssetRequest(req)) {
+  if (assetOrPageRequest(req) || sameOrigin(req)) {
     return next();
   }
   return cors({
