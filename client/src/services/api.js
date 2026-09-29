@@ -17,6 +17,16 @@ function resolveApiUrl(raw) {
     return "/api";
   }
 
+  // CRITICAL blank-page guard: Render dashboard env vars are baked into
+  // dist/*.js at build time. If VITE_API_URL is/was http://localhost:5000
+  // (or any localhost/127.0.0.1/0.0.0.0), the HTTPS live page would try a
+  // mixed-content fetch to the visitor's own machine, which the browser
+  // blocks — leaving #root empty (blank white screen). Ignore such values
+  // and stay on same-origin "/api".
+  if (/^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?(\/.*)?$/i.test(value)) {
+    return "/api";
+  }
+
   if (/\/api$/i.test(value)) {
     return value;
   }

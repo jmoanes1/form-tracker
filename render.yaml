@@ -1,8 +1,14 @@
 # Render — single Web Service (React + Express together)
 # https://render.com/docs/web-services
+#
+# IMPORTANT: client/dist is git-ignored, so Render MUST rebuild it on every
+# deploy. Without this build step Render keeps serving the old committed
+# bundle whose JS calls http://localhost:5000 and renders a blank page.
 buildCommand: npm run install:all && npm run build
 startCommand: npm start
 # No VITE_API_URL is needed: the browser calls same-origin relative "/api".
+# Do NOT set VITE_API_URL=https://... or http://localhost:5000 on Render —
+# Vite bakes it into dist/*.js and a localhost value blanks the live page.
 # Only set VITE_API_URL + FRONTEND_URL if you split into separate services.
 # envVars:
 #   - key: VITE_API_URL
