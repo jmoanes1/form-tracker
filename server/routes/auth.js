@@ -16,7 +16,15 @@ function readCookie(request) {
 function createSession(response, username) {
   const token = crypto.randomBytes(32).toString("hex");
   sessions.set(token, { username, createdAt: Date.now() });
-  response.cookie(SESSION_COOKIE, token, { httpOnly: true, sameSite: "lax", maxAge: 1000 * 60 * 60 * 12 });
+  // In production behind HTTPS (Render) the cookie must be Secure + SameSite=None
+  // so the browser sends it back on same-origin fetch with credentials:include.
+  const isHttps = process.env.NODE_ENV === "production";
+  response.cookie(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: isHttps ? "none" : "lax",
+    secure: isHttps ? true : false,
+    maxAge: 1000 * 60 * 60 * 12,
+  });
 }
 
 function clearSession(request, response) {

@@ -1,0 +1,11 @@
+# Render — single Web Service (React + Express together)
+# https://render.com/docs/web-services
+buildCommand: npm run install:all && npm run build
+startCommand: npm start
+# No VITE_API_URL is needed: the browser calls same-origin relative "/api".
+# Only set VITE_API_URL + FRONTEND_URL if you split into separate services.
+# envVars:
+#   - key: VITE_API_URL
+#     value: https://YOUR-BACKEND.onrender.com/api
+#   - key: FRONTEND_URL
+#     value: https://YOUR-FRONTEND.onrender.com

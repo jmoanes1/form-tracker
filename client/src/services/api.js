@@ -1,7 +1,47 @@
-// Relative by default so requests stay on the same origin and are proxied
-// to the API server by Vite (see vite.config.js). Set VITE_API_URL to point
-// at an absolute API URL instead, e.g. http://localhost:5000/api.
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+// API base URL.
+//
+// - Local dev (default): "/api" — same-origin relative URL. Vite proxies
+//   "/api/*" to the Express server (see client/vite.config.js), so the
+//   browser never talks to http://localhost:5000 directly.
+// - Separate frontend/backend deploys: set VITE_API_URL to the public API
+//   origin, e.g. "https://my-api.onrender.com" or
+//   "https://my-api.onrender.com/api". A bare origin gets "/api" appended
+//   automatically, so both forms work.
+//
+// Never hard-code "http://localhost:5000" here — it breaks production on
+// Render because a visitor's browser has no server on their own localhost.
+function resolveApiUrl(raw) {
+  const value = String(raw || "").trim().replace(/\/+$/, "");
+
+  if (!value) {
+    return "/api";
+  }
+
+  if (/\/api$/i.test(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = new URL(value);
+
+    // Bare origin like "https://my-api.onrender.com" -> ".../api".
+    // A URL with its own path ("/v1", ...) is left untouched.
+    if (parsed.pathname === "/" || parsed.pathname === "") {
+      return `${value}/api`;
+    }
+
+    return value;
+  } catch {
+    // Relative value such as "/" or "/api/" (trailing slash removed above).
+    if (value === "/") {
+      return "/api";
+    }
+
+    return value;
+  }
+}
+
+const API_URL = resolveApiUrl(import.meta.env.VITE_API_URL);
 
 // Use the message from the API when it sends one, otherwise fall back to the
 // message for the operation that was attempted.

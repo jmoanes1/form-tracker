@@ -1,34 +1,74 @@
+const cors = require("cors");
 const express = require("express");
 const path = require("path");
 
+const websitesRouter = require("./routes/websites");
+const dashboardRouter = require("./routes/dashboard");
+const { authRouter, requireAuth } = require("./routes/auth");
+
 const app = express();
 
-// ==========================================
-// CONFIGURATION
-// ==========================================
+// Architecture A: ONE Render Web Service serves BOTH the React production
+// build (client/dist) and the Express API. The browser calls relative
+// "/api/..." URLs on the same origin — never http://localhost:5000.
+// Render injects PORT; listen on 0.0.0.0 so the platform can route to us.
+const PORT = process.env.PORT || 5000;
 
-const PORT = process.env.PORT || 10000;
-
-// React production build location
+// React production build location (built with `npm run build` in client/).
 const clientPath = path.join(__dirname, "../client/dist");
 
-// ==========================================
-// MIDDLEWARE
-// ==========================================
+// Behind Render's proxy (HTTPS termination).
+app.set("trust proxy", 1);
 
-app.use(express.json());
+// Same-origin production requests need no CORS. CORS only matters for local
+// dev (Vite on :5173) or a split frontend — then set FRONTEND_URL on Render.
+const devOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const extraOrigins = String(process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowedOrigins = [...devOrigins, ...extraOrigins];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin ${origin}`));
+    },
+    credentials: true,
+  })
+);
+
+app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ==========================================
-// TEMPORARY IN-MEMORY DATA
-// ==========================================
-// No database / SQL required.
-//
-// IMPORTANT:
-// Data stored here will reset when the Render
-// service restarts or redeploys.
+// No database / SQL. JSON file storage via server/utils + server/services.
+// Data persists in server/data/*.json (Render disk resets on redeploy).
 
-let websites = [];
+// ==========================================
+// API ROUTES (mounted routers — do not remove)
+// ==========================================
+// Final endpoints produced:
+//   POST /api/auth/login   (router.post("/login") mounted at /api/auth)
+//   GET  /api/auth/status
+//   GET/POST/PUT/DELETE /api/websites...
+//   GET  /api/dashboard
+app.use("/api/auth", authRouter);
+app.use("/api/websites", requireAuth, websitesRouter);
+app.use("/api/dashboard", requireAuth, dashboardRouter);
+
+// Return JSON (instead of an empty 413) when the photo payload is too big.
+app.use((err, req, res, next) => {
+  if (err && (err.type === "entity.too.large" || err.status === 413)) {
+    return res.status(413).json({
+      success: false,
+      message:
+        "Image is too large. Upload a PNG, JPEG, WebP, or GIF image under 1 MB.",
+    });
+  }
+  return next(err);
+});
 
 // ==========================================
 // API - HEALTH CHECK
@@ -42,177 +82,17 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ==========================================
-// API - GET ALL WEBSITES
-// ==========================================
+// (Websites + dashboard are served by the mounted routers above;
+// auth lives in server/routes/auth.js, websites in routes/websites.js,
+// dashboard in routes/dashboard.js.)
 
-app.get("/api/websites", (req, res) => {
-  res.status(200).json({
-    success: true,
-    websites,
-  });
-});
+/* (Replaced by mounted routers above.) */
 
-// ==========================================
-// API - GET ONE WEBSITE
-// ==========================================
+/* (Replaced by mounted routers above — PUT /api/websites/:id lives in routes/websites.js.) */
 
-app.get("/api/websites/:id", (req, res) => {
-  const id = req.params.id;
+/* (Replaced by mounted routers above — DELETE /api/websites/:id lives in routes/websites.js.) */
 
-  const website = websites.find(
-    (item) => String(item.id) === String(id)
-  );
-
-  if (!website) {
-    return res.status(404).json({
-      success: false,
-      message: "Website not found",
-    });
-  }
-
-  res.status(200).json({
-    success: true,
-    website,
-  });
-});
-
-// ==========================================
-// API - ADD WEBSITE
-// ==========================================
-
-app.post("/api/websites", (req, res) => {
-  const {
-    name,
-    url,
-    category = "None Leads websites",
-    status = "Working",
-  } = req.body;
-
-  if (!name || !url) {
-    return res.status(400).json({
-      success: false,
-      message: "Website name and URL are required",
-    });
-  }
-
-  const newWebsite = {
-    id: Date.now(),
-    name,
-    url,
-    category,
-    status,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  websites.push(newWebsite);
-
-  res.status(201).json({
-    success: true,
-    message: "Website added successfully",
-    website: newWebsite,
-  });
-});
-
-// ==========================================
-// API - UPDATE WEBSITE
-// ==========================================
-
-app.put("/api/websites/:id", (req, res) => {
-  const id = req.params.id;
-
-  const index = websites.findIndex(
-    (item) => String(item.id) === String(id)
-  );
-
-  if (index === -1) {
-    return res.status(404).json({
-      success: false,
-      message: "Website not found",
-    });
-  }
-
-  websites[index] = {
-    ...websites[index],
-    ...req.body,
-    id: websites[index].id,
-    updatedAt: new Date().toISOString(),
-  };
-
-  res.status(200).json({
-    success: true,
-    message: "Website updated successfully",
-    website: websites[index],
-  });
-});
-
-// ==========================================
-// API - DELETE WEBSITE
-// ==========================================
-
-app.delete("/api/websites/:id", (req, res) => {
-  const id = req.params.id;
-
-  const index = websites.findIndex(
-    (item) => String(item.id) === String(id)
-  );
-
-  if (index === -1) {
-    return res.status(404).json({
-      success: false,
-      message: "Website not found",
-    });
-  }
-
-  const deletedWebsite = websites[index];
-
-  websites.splice(index, 1);
-
-  res.status(200).json({
-    success: true,
-    message: "Website deleted successfully",
-    website: deletedWebsite,
-  });
-});
-
-// ==========================================
-// API - DASHBOARD COUNTS
-// ==========================================
-
-app.get("/api/dashboard", (req, res) => {
-  const working = websites.filter(
-    (website) => website.status === "Working"
-  ).length;
-
-  const notWorking = websites.filter(
-    (website) => website.status === "Not Working"
-  ).length;
-
-  const broken = websites.filter(
-    (website) => website.status === "Broken"
-  ).length;
-
-  const noneLeads = websites.filter(
-    (website) => website.category === "None Leads websites"
-  ).length;
-
-  const leads = websites.filter(
-    (website) => website.category === "Leads websites"
-  ).length;
-
-  res.status(200).json({
-    success: true,
-    counts: {
-      total: websites.length,
-      working,
-      notWorking,
-      broken,
-      noneLeads,
-      leads,
-    },
-  });
-});
+/* (Replaced by mounted routers above — GET /api/dashboard lives in routes/dashboard.js.) */
 
 // ==========================================
 // SERVE REACT FRONTEND
@@ -266,6 +146,10 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
+
+  if (err && err.message && String(err.message).startsWith("CORS blocked")) {
+    return res.status(403).json({ success: false, message: err.message });
+  }
 
   res.status(500).json({
     success: false,
