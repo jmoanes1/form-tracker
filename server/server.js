@@ -22,6 +22,9 @@ app.set("trust proxy", 1);
 
 // Same-origin production requests need no CORS. CORS only matters for local
 // dev (Vite on :5173) or a split frontend — then set FRONTEND_URL on Render.
+// NOTE: static assets (/assets/*.js, *.css) must NEVER be CORS-blocked:
+// <script type="module crossorigin> requires CORS, and a blocked JS module
+// leaves #root empty = blank white screen with no console error body.
 const devOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 const extraOrigins = String(process.env.FRONTEND_URL || "")
   .split(",")
@@ -29,16 +32,31 @@ const extraOrigins = String(process.env.FRONTEND_URL || "")
   .filter(Boolean);
 const allowedOrigins = [...devOrigins, ...extraOrigins];
 
-app.use(
-  cors({
+function isAssetRequest(req) {
+  const p = String(req.path || "");
+  return (
+    p.startsWith("/assets/") ||
+    p === "/favicon.svg" ||
+    p === "/icons.svg" ||
+    /\.(js|css|map|png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|eot)$/i.test(p)
+  );
+}
+
+app.use((req, res, next) => {
+  // Assets are always same-origin public files — skip CORS entirely so a
+  // missing Origin allowlist entry can never blank the page.
+  if (isAssetRequest(req)) {
+    return next();
+  }
+  return cors({
     origin(origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error(`CORS blocked for origin ${origin}`));
     },
     credentials: true,
-  })
-);
+  })(req, res, next);
+});
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
