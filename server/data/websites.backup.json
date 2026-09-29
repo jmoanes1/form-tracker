@@ -1,6 +1,13 @@
 [
   {
     "id": "ef5181e3-6952-4d8f-91c8-0d3e7b3cd380",
+    "title": "Bricon Associate Pte Ltd",
+    "domainName": "Exabyte SG",
+    "hostingName": "Hostinger",
+    "credentials": {
+      "username": "system@medishure.com",
+      "password": "M3D1shure@!OWE63"
+    },
     "website": "https://bricon.com.sg/",
     "type": "leads",
     "status": "working",
@@ -19,6 +26,13 @@
   },
   {
     "id": "b3a8c040-8d64-4ca3-8dc7-15c9cb2f23ef",
+    "title": "Quotation Intl",
+    "domainName": "GoDaddy",
+    "hostingName": "Hostinger",
+    "credentials": {
+      "username": "system@medishure.com",
+      "password": "M3D1shure@!DBC89"
+    },
     "website": "https://quotation.medical-intl.com/",
     "type": "leads",
     "status": "working",
@@ -37,6 +51,13 @@
   },
   {
     "id": "d04d839a-2530-4ea1-bcbb-8e48854a953f",
+    "title": "Bupa Medical",
+    "domainName": "GoDaddy",
+    "hostingName": "Hostinger",
+    "credentials": {
+      "username": "system@medishure.com",
+      "password": "M3D1shure@!AOC852"
+    },
     "website": "https://bupa-medical.com/",
     "type": "leads",
     "status": "untested",
@@ -48,6 +69,13 @@
   },
   {
     "id": "6432950d-fa98-40aa-a271-063e0e67605e",
+    "title": "",
+    "domainName": "",
+    "hostingName": "",
+    "credentials": {
+      "username": "",
+      "password": ""
+    },
     "website": "https://medical818.com/",
     "type": "none_leads",
     "status": "untested",
@@ -59,6 +87,13 @@
   },
   {
     "id": "92c5a115-274e-4964-92f7-ae4a7daed7e6",
+    "title": "Medilife Global",
+    "domainName": "",
+    "hostingName": "",
+    "credentials": {
+      "username": "system@medishure.com",
+      "password": "M3D1shure@!STP43"
+    },
     "website": "https://medlifeglobal.com/",
     "type": "none_leads",
     "status": "untested",
@@ -66,6 +101,24 @@
     "tester": "",
     "lastTested": null,
     "createdAt": "2026-09-22T07:55:56.908Z",
+    "testHistory": []
+  },
+  {
+    "id": "f75f2cac-4c1f-4ee6-9ca5-85f12680651e",
+    "title": "Raysun Oil Gas",
+    "domainName": "",
+    "hostingName": "",
+    "credentials": {
+      "username": "system@medishure.com",
+      "password": "M3D1shure@!DGR17"
+    },
+    "website": "https://raysunoilgas.com/",
+    "type": "none_leads",
+    "status": "untested",
+    "notes": "",
+    "tester": "John",
+    "lastTested": null,
+    "createdAt": "2026-09-22T07:57:44.697Z",
     "testHistory": []
   }
 ]

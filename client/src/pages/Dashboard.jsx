@@ -22,7 +22,7 @@ import {
   deleteWebsite,
   getWebsites,
   updateWebsite,
-} from "../services/api";
+} from "../services/websitesApi";
 
 import {
   PAGE_SIZE,
@@ -34,7 +34,16 @@ import {
 } from "../utils/websiteList";
 import { createWebsitesCsv } from "../utils/csv";
 
-function Dashboard() {
+function Dashboard({
+  username,
+  avatarUrl,
+  onProfile,
+  onChangePassword,
+  onLogout,
+  initialTypeFilter = "",
+  pageTitle = "Form Testing Dashboard",
+  pageDescription = "Monitor and manage WordPress form testing.",
+}) {
   const [websites, setWebsites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,7 +54,7 @@ function Dashboard() {
 
   // Search, filtering, sorting and pagination
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState(initialTypeFilter);
   const [statusFilter, setStatusFilter] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
@@ -396,6 +405,13 @@ function Dashboard() {
       <Header
         onAddWebsite={openAddForm}
         onExportWebsites={exportWebsites}
+        username={username}
+        avatarUrl={avatarUrl}
+        onProfile={onProfile}
+        onChangePassword={onChangePassword}
+        onLogout={onLogout}
+        title={pageTitle}
+        description={pageDescription}
       />
 
       {error && (
@@ -435,7 +451,7 @@ function Dashboard() {
       <section className="websites-section">
         <div className="section-header">
           <div>
-            <h2>Websites</h2>
+            <h2>{initialTypeFilter ? `${initialTypeFilter === "leads" ? "Leads" : "None Leads"} Websites` : "Websites"}</h2>
             <p>
               Manage and test your websites.
             </p>
@@ -455,6 +471,7 @@ function Dashboard() {
               onTypeChange={handleTypeChange}
               onStatusChange={handleStatusChange}
               onSortChange={handleSortChange}
+              typeLocked={Boolean(initialTypeFilter)}
               disabled={loading}
             />
           </div>

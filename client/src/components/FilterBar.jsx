@@ -9,6 +9,7 @@ function FilterBar({
   onTypeChange,
   onStatusChange,
   onSortChange,
+  typeLocked = false,
   disabled = false,
 }) {
   return (
@@ -20,7 +21,7 @@ function FilterBar({
           className="form-control"
           value={type}
           onChange={(event) => onTypeChange(event.target.value)}
-          disabled={disabled}
+          disabled={disabled || typeLocked}
         >
           <option value="">All Types</option>
 
@@ -72,4 +73,3 @@ function FilterBar({
 }
 
 export default FilterBar;
-

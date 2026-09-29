@@ -28,7 +28,7 @@ export const SORT_OPTIONS = [
 // The order used when sorting by status.
 const STATUS_ORDER = ["working", "not_working", "broken", "untested"];
 
-// Search (website, tester, notes), type filter and status filter work together.
+// Search (title, domain, hosting, website, tester, notes), type filter and status filter work together.
 export function filterWebsites(
   websites,
   { search = "", type = "", status = "" } = {}
@@ -38,7 +38,14 @@ export function filterWebsites(
   return websites.filter((website) => {
     const matchesSearch =
       !term ||
-      [website.website, website.tester, website.notes].some((value) =>
+      [
+        website.title,
+        website.domainName,
+        website.hostingName,
+        website.website,
+        website.tester,
+        website.notes,
+      ].some((value) =>
         String(value || "").toLowerCase().includes(term)
       );
 

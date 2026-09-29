@@ -11,6 +11,13 @@ const backupFile = path.join(__dirname, "../data/websites.backup.json");
 function withDefaults(record) {
   return {
     id: record.id || crypto.randomUUID(),
+    title: record.title || "",
+    domainName: record.domainName || "",
+    hostingName: record.hostingName || "",
+    credentials: {
+      username: record.credentials?.username || "",
+      password: record.credentials?.password || "",
+    },
     website: record.website || "",
     type: record.type || "leads",
     status: record.status || "untested",

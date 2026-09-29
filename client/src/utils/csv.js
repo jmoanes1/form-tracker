@@ -125,6 +125,9 @@ export function buildImportPlan(text, existingWebsites = []) {
 // Creates a spreadsheet-friendly CSV export of the full website registry.
 export function createWebsitesCsv(websites) {
   const columns = [
+    "title",
+    "domainName",
+    "hostingName",
     "website",
     "type",
     "status",

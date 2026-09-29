@@ -25,7 +25,11 @@ async function request(path, { fallbackMessage, ...options } = {}) {
   let response;
 
   try {
-    response = await fetch(`${API_URL}${path}`, options);
+    response = await fetch(`${API_URL}${path}`, {
+      // Required so the login session cookie is sent on every request.
+      credentials: "include",
+      ...options,
+    });
   } catch {
     // fetch only rejects when the request never reached the server:
     // server stopped, wrong port, or blocked by the browser.
@@ -97,3 +101,13 @@ export async function deleteWebsite(id) {
     fallbackMessage: "Failed to delete website",
   });
 }
+
+export function getAuthStatus() { return request("/auth/status"); }
+export function setupAccount(values) { return request("/auth/setup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); }
+export function login(values) { return request("/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); }
+export function logout() { return request("/auth/logout", { method: "POST" }); }
+export function changePassword(values) { return request("/auth/change-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); }
+export function updateProfile(values) { return request("/auth/profile", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); }
+export function getUsers() { return request("/auth/users"); }
+export function createAccount(values) { return request("/auth/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) }); }
+export function deleteAccount(username) { return request(`/auth/users/${encodeURIComponent(username)}`, { method: "DELETE" }); }

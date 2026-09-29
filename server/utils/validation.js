@@ -58,6 +58,34 @@ function validateWebsiteBody(body = {}, { partial = false } = {}) {
   const errors = {};
   const values = {};
 
+  if (body.title !== undefined) {
+    values.title = toText(body.title);
+  }
+
+  if (body.domainName !== undefined) {
+    values.domainName = toText(body.domainName);
+  }
+
+  if (body.hostingName !== undefined) {
+    values.hostingName = toText(body.hostingName);
+  }
+
+  if (body.credentials !== undefined) {
+    if (!body.credentials || typeof body.credentials !== "object") {
+      errors.credentials = "Credentials must contain a username and password.";
+    } else {
+      values.credentials = {};
+
+      if (body.credentials.username !== undefined) {
+        values.credentials.username = toText(body.credentials.username);
+      }
+
+      if (body.credentials.password !== undefined) {
+        values.credentials.password = String(body.credentials.password);
+      }
+    }
+  }
+
   if (!partial || body.website !== undefined) {
     const website = toText(body.website);
 

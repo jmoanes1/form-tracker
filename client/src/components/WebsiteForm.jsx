@@ -4,11 +4,16 @@ import { STATUS_OPTIONS, TYPE_OPTIONS } from "../utils/websiteList";
 import { isValidWebsiteUrl } from "../utils/validation";
 
 const EMPTY_VALUES = {
+  title: "",
+  domainName: "",
+  hostingName: "",
   website: "",
   type: "",
   status: "untested",
   tester: "",
   notes: "",
+  username: "",
+  password: "",
 };
 
 // Returns the error messages for the given values.
@@ -52,6 +57,9 @@ function WebsiteForm({
   const [values, setValues] = useState(() => ({
     ...EMPTY_VALUES,
     ...initialValues,
+    username: initialValues?.credentials?.username || "",
+    // Passwords are deliberately never rendered back into the form.
+    password: "",
   }));
 
   const [errors, setErrors] = useState({});
@@ -86,11 +94,21 @@ function WebsiteForm({
     }
 
     const payload = {
+      title: values.title.trim(),
+      domainName: values.domainName.trim(),
+      hostingName: values.hostingName.trim(),
       website: values.website.trim(),
       type: values.type,
       tester: values.tester.trim(),
       notes: values.notes.trim(),
     };
+
+    if (values.username.trim() || values.password) {
+      payload.credentials = {
+        username: values.username.trim(),
+        ...(values.password ? { password: values.password } : {}),
+      };
+    }
 
     if (showStatus) {
       payload.status = values.status;
@@ -106,6 +124,60 @@ function WebsiteForm({
           {error}
         </div>
       )}
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="website-title">
+          Website Title
+        </label>
+
+        <input
+          id="website-title"
+          name="title"
+          type="text"
+          className="form-control"
+          placeholder="Example Company"
+          value={values.title}
+          onChange={handleChange}
+          disabled={submitting}
+          autoFocus
+        />
+
+        <p className="form-hint">A friendly name to identify this website.</p>
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="domain-name">
+          Domain Name
+        </label>
+
+        <input
+          id="domain-name"
+          name="domainName"
+          type="text"
+          className="form-control"
+          placeholder="example.com"
+          value={values.domainName}
+          onChange={handleChange}
+          disabled={submitting}
+        />
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="hosting-name">
+          Hosting Name
+        </label>
+
+        <input
+          id="hosting-name"
+          name="hostingName"
+          type="text"
+          className="form-control"
+          placeholder="e.g. SiteGround, Kinsta, or AWS"
+          value={values.hostingName}
+          onChange={handleChange}
+          disabled={submitting}
+        />
+      </div>
 
       <div className="form-field">
         <label className="form-label" htmlFor="website-url">
@@ -125,7 +197,6 @@ function WebsiteForm({
           value={values.website}
           onChange={handleChange}
           disabled={submitting}
-          autoFocus
         />
 
         {errors.website && (
@@ -163,6 +234,50 @@ function WebsiteForm({
           <p className="form-error">{errors.type}</p>
         )}
       </div>
+
+      <fieldset className="credential-fields">
+        <legend>Website credentials</legend>
+        <p className="form-hint">
+          Optional credentials used to access this website. Leave the password
+          blank when editing to keep the saved password unchanged.
+        </p>
+
+        <div className="form-field">
+          <label className="form-label" htmlFor="website-username">
+            Username or email
+          </label>
+
+          <input
+            id="website-username"
+            name="username"
+            type="text"
+            className="form-control"
+            placeholder="name@example.com"
+            value={values.username}
+            onChange={handleChange}
+            disabled={submitting}
+            autoComplete="username"
+          />
+        </div>
+
+        <div className="form-field">
+          <label className="form-label" htmlFor="website-password">
+            Password
+          </label>
+
+          <input
+            id="website-password"
+            name="password"
+            type="password"
+            className="form-control"
+            placeholder={initialValues?.credentials?.password ? "Saved password" : "Enter password"}
+            value={values.password}
+            onChange={handleChange}
+            disabled={submitting}
+            autoComplete="new-password"
+          />
+        </div>
+      </fieldset>
 
       {showStatus && (
         <div className="form-field">

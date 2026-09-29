@@ -1,7 +1,12 @@
 const express = require("express");
 const crypto = require("crypto");
 
-const { readWebsites, saveWebsites } = require("../utils/dataStore");
+const {
+  findWebsiteIndex,
+  getWebsiteById,
+  listWebsites,
+  persistWebsites,
+} = require("../services/websiteService");
 
 const {
   getWebsiteKey,
@@ -9,11 +14,6 @@ const {
 } = require("../utils/validation");
 
 const router = express.Router();
-
-// Finds the position of a website in the array. Returns -1 when missing.
-function findIndexById(websites, id) {
-  return websites.findIndex((item) => item.id === id);
-}
 
 // Returns the index of another website that already uses the same URL.
 function findDuplicateIndex(websites, website, ignoreId = null) {
@@ -38,7 +38,7 @@ router.get("/", (req, res) => {
   try {
     res.json({
       success: true,
-      data: readWebsites(),
+      data: listWebsites(),
     });
   } catch (error) {
     console.error(`GET /api/websites failed: ${error.message}`);
@@ -53,9 +53,7 @@ router.get("/", (req, res) => {
 // GET /api/websites/:id
 router.get("/:id", (req, res) => {
   try {
-    const website = readWebsites().find(
-      (item) => item.id === req.params.id
-    );
+    const website = getWebsiteById(req.params.id);
 
     if (!website) {
       return res.status(404).json({
@@ -87,7 +85,7 @@ router.post("/", (req, res) => {
       return sendValidationError(res, errors);
     }
 
-    const websites = readWebsites();
+    const websites = listWebsites();
 
     if (findDuplicateIndex(websites, values.website) !== -1) {
       return res.status(409).json({
@@ -99,6 +97,10 @@ router.post("/", (req, res) => {
     // New websites always start as untested.
     const newWebsite = {
       id: crypto.randomUUID(),
+      title: values.title || "",
+      domainName: values.domainName || "",
+      hostingName: values.hostingName || "",
+      credentials: values.credentials || { username: "", password: "" },
       website: values.website,
       type: values.type,
       status: "untested",
@@ -111,7 +113,7 @@ router.post("/", (req, res) => {
 
     websites.push(newWebsite);
 
-    saveWebsites(websites);
+    persistWebsites(websites);
 
     res.status(201).json({
       success: true,
@@ -139,8 +141,8 @@ router.put("/:id", (req, res) => {
       return sendValidationError(res, errors);
     }
 
-    const websites = readWebsites();
-    const index = findIndexById(websites, req.params.id);
+    const websites = listWebsites();
+    const index = findWebsiteIndex(websites, req.params.id);
 
     if (index === -1) {
       return res.status(404).json({
@@ -165,6 +167,9 @@ router.put("/:id", (req, res) => {
     const updatedWebsite = {
       ...currentWebsite,
       ...values,
+      credentials: values.credentials
+        ? { ...currentWebsite.credentials, ...values.credentials }
+        : currentWebsite.credentials,
       id: currentWebsite.id,
       testHistory: [...currentWebsite.testHistory],
     };
@@ -197,7 +202,7 @@ router.put("/:id", (req, res) => {
 
     websites[index] = updatedWebsite;
 
-    saveWebsites(websites);
+    persistWebsites(websites);
 
     res.json({
       success: true,
@@ -217,8 +222,8 @@ router.put("/:id", (req, res) => {
 // DELETE /api/websites/:id
 router.delete("/:id", (req, res) => {
   try {
-    const websites = readWebsites();
-    const index = findIndexById(websites, req.params.id);
+    const websites = listWebsites();
+    const index = findWebsiteIndex(websites, req.params.id);
 
     if (index === -1) {
       return res.status(404).json({
@@ -229,7 +234,7 @@ router.delete("/:id", (req, res) => {
 
     websites.splice(index, 1);
 
-    saveWebsites(websites);
+    persistWebsites(websites);
 
     res.json({
       success: true,

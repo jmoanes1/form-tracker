@@ -39,6 +39,7 @@ function WebsiteTable({
               />
             </th>
 
+            <th>Title</th>
             <th>Website</th>
             <th>Type</th>
             <th>Status</th>

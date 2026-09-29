@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output
+dist/
+dist-ssr/
+client/dist/
+client/dist-ssr/
+
+# Environment variables (never commit real values)
+.env
+.env.*
+*.local
+!.env.example
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# Auth / user data with password hashes and avatars (never commit)
+server/data/user.json
+server/data/users.json
+server/data/*.local.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

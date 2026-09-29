@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import Modal from "./Modal";
 import StatusBadge from "./StatusBadge";
 import TypeBadge from "./TypeBadge";
@@ -5,14 +7,34 @@ import { formatDate, formatDateTime } from "../utils/format";
 
 // Detailed view of one website, including its testing history.
 function WebsiteDetailModal({ website, onClose, onTest, onEdit }) {
+  const [copied, setCopied] = useState(false);
+
   // Newest test first.
   const history = [...(website.testHistory || [])].sort(
     (a, b) => new Date(b.testedAt).getTime() - new Date(a.testedAt).getTime()
   );
 
+  async function copyPassword() {
+    if (!website.credentials?.password) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(website.credentials.password);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
     <Modal title="Website Details" onClose={onClose}>
       <div className="detail">
+        <div className="detail-item">
+          <dt>Website Title</dt>
+          <dd>{website.title || "—"}</dd>
+        </div>
+
         <a
           className="detail-url"
           href={website.website}
@@ -40,6 +62,40 @@ function WebsiteDetailModal({ website, onClose, onTest, onEdit }) {
           <div className="detail-item">
             <dt>Tester</dt>
             <dd>{website.tester || "—"}</dd>
+          </div>
+
+          <div className="detail-item">
+            <dt>Domain Name</dt>
+            <dd>{website.domainName || "—"}</dd>
+          </div>
+
+          <div className="detail-item">
+            <dt>Hosting Name</dt>
+            <dd>{website.hostingName || "—"}</dd>
+          </div>
+
+          <div className="detail-item">
+            <dt>Credentials</dt>
+            {website.credentials?.username || website.credentials?.password ? (
+              <dd className="credential-summary">
+                <span>
+                  {website.credentials.username
+                    ? `${website.credentials.username} · password saved`
+                    : "Password saved"}
+                </span>
+                {website.credentials.password && (
+                  <button
+                    type="button"
+                    className="copy-password-button"
+                    onClick={copyPassword}
+                  >
+                    {copied ? "Copied" : "Copy password"}
+                  </button>
+                )}
+              </dd>
+            ) : (
+              <dd>—</dd>
+            )}
           </div>
 
           <div className="detail-item">
