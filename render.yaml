@@ -10,8 +10,20 @@ startCommand: npm start
 # Do NOT set VITE_API_URL=https://... or http://localhost:5000 on Render —
 # Vite bakes it into dist/*.js and a localhost value blanks the live page.
 # Only set VITE_API_URL + FRONTEND_URL if you split into separate services.
+#
+# ACCOUNTS / DATA
+# Accounts live in users.json inside the data directory (DATA_DIR, or
+# server/data when unset). Render's container filesystem is EPHEMERAL, so
+# without a persistent disk every deploy wipes all accounts and the site falls
+# back to the first-run "create admin" screen. To keep accounts permanently:
+#   1. Dashboard -> your service -> Disks -> Add Disk (mount path /var/data)
+#   2. Dashboard -> Environment -> add  DATA_DIR=/var/data
+#   3. Create the admin account once; it then survives every future deploy.
+# Note: files already written to server/data are NOT copied automatically.
 # envVars:
 #   - key: VITE_API_URL
 #     value: https://YOUR-BACKEND.onrender.com/api
 #   - key: FRONTEND_URL
 #     value: https://YOUR-FRONTEND.onrender.com
+#   - key: DATA_DIR
+#     value: /var/data

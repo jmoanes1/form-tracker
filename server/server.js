@@ -5,6 +5,7 @@ const path = require("path");
 const websitesRouter = require("./routes/websites");
 const dashboardRouter = require("./routes/dashboard");
 const { authRouter, requireAuth } = require("./routes/auth");
+const { dataDir } = require("./utils/dataStore");
 
 const app = express();
 
@@ -77,7 +78,9 @@ app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // No database / SQL. JSON file storage via server/utils + server/services.
-// Data persists in server/data/*.json (Render disk resets on redeploy).
+// Data persists in DATA_DIR (or server/data). Render's container filesystem
+// is ephemeral: without a persistent disk, accounts and websites are lost on
+// every deploy and the app falls back to first-time setup.
 
 // ==========================================
 // API ROUTES (mounted routers — do not remove)
@@ -200,6 +203,7 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("======================================");
   console.log(`Port: ${PORT}`);
   console.log(`React build: ${clientPath}`);
+  console.log(`Data directory: ${dataDir}${process.env.DATA_DIR ? "" : "  (ephemeral - set DATA_DIR + mount a Render disk to persist)"}`);
   console.log(`Environment: ${process.env.NODE_ENV || "production"}`);
   console.log("Server is running on 0.0.0.0");
   console.log("======================================");

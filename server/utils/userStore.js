@@ -2,8 +2,23 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const usersFile = path.join(__dirname, "../data/users.json");
-const legacyFile = path.join(__dirname, "../data/user.json");
+// Where users.json lives. DATA_DIR lets Render mount a persistent disk
+// (e.g. DATA_DIR=/var/data) so accounts survive redeploys; without it the
+// files stay in the repo, which is wiped every deploy and forces a re-setup.
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, "../data");
+const usersFile = path.join(dataDir, "users.json");
+const legacyFile = path.join(dataDir, "user.json");
+
+// Render's disk (and any first write) may need the directory created.
+function ensureDataDir() {
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+  } catch (error) {
+    console.error(`Could not create data directory ${dataDir}: ${error.message}`);
+  }
+}
 
 const VALID_ROLES = ["admin", "staff"];
 
@@ -44,6 +59,7 @@ function readUsers() {
           username: normalizeUsername(legacy.username),
           role: normalizeRole(legacy.role || "admin"),
         };
+        ensureDataDir();
         fs.writeFileSync(usersFile, JSON.stringify([migrated], null, 2), "utf8");
         return [migrated];
       }
@@ -55,6 +71,7 @@ function readUsers() {
 }
 
 function saveUsers(users) {
+  ensureDataDir();
   fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), "utf8");
 }
 

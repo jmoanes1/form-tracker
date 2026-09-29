@@ -84,6 +84,15 @@ router.post("/setup", (request, response) => {
 });
 
 router.post("/login", (request, response) => {
+  // A fresh (or wiped) server has no accounts at all. Say so explicitly,
+  // otherwise every attempt just reports "Incorrect username or password".
+  if (readUsers().length === 0) {
+    return response.status(409).json({
+      success: false,
+      message: "No account exists on this server yet. Reload the page to create the first admin account.",
+    });
+  }
+
   const user = findUser(request.body.username);
   if (!user || !verifyPassword(String(request.body.password || ""), user)) {
     return response.status(401).json({ success: false, message: "Incorrect username or password." });
