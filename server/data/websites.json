@@ -120,5 +120,23 @@
     "lastTested": null,
     "createdAt": "2026-09-22T07:57:44.697Z",
     "testHistory": []
+  },
+  {
+    "id": "146cddc5-cdfe-4d63-9244-8fcd8e196b3c",
+    "title": "Jus",
+    "domainName": "",
+    "hostingName": "",
+    "credentials": {
+      "username": "",
+      "password": ""
+    },
+    "website": "https://juscall.com.ph/",
+    "type": "leads",
+    "status": "untested",
+    "notes": "",
+    "tester": "",
+    "lastTested": null,
+    "createdAt": "2026-10-27T08:41:46.357Z",
+    "testHistory": []
   }
 ]

@@ -26,7 +26,7 @@ app.set("trust proxy", 1);
 // NOTE: static assets (/assets/*.js, *.css) must NEVER be CORS-blocked:
 // <script type="module crossorigin> requires CORS, and a blocked JS module
 // leaves #root empty = blank white screen with no console error body.
-const devOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const devOrigins = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174", "http://localhost:5175", "http://127.0.0.1:5175"];
 const extraOrigins = String(process.env.FRONTEND_URL || "")
   .split(",")
   .map((s) => s.trim())
