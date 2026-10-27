@@ -1,0 +1,50 @@
+{
+  "name": "add_website",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Website title/name"
+      },
+      "domainName": {
+        "type": "string",
+        "description": "Domain name (e.g., example.com)"
+      },
+      "hostingName": {
+        "type": "string",
+        "description": "Hosting provider name"
+      },
+      "url": {
+        "type": "string",
+        "description": "The website URL (must include http:// or https://)"
+      },
+      "type": {
+        "type": "string",
+        "description": "Website type (leads or none-leads)"
+      },
+      "status": {
+        "type": "string",
+        "description": "Current status (working, not-working, broken, untested)"
+      },
+      "tester": {
+        "type": "string",
+        "description": "Name of the person who tested the website"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Any additional notes about the website"
+      },
+      "username": {
+        "type": "string",
+        "description": "Username for website credentials (optional)"
+      },
+      "password": {
+        "type": "string",
+        "description": "Password for website credentials (optional)"
+      }
+    },
+    "required": ["title", "domainName", "url", "type"],
+    "additionalProperties": false
+  }
+}
