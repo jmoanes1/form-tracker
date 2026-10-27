@@ -3,9 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "client/dist",
   "functions": {
-    "server/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
+    "server/**/*.js": {}
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/server/server.js" },
